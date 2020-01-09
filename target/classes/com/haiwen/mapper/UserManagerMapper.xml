@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haiwen.mapper.UserManagerMapper">
+    <select id="selectUserByNameAndRole" resultType="com.haiwen.pojo.User">
+        select * from s_user
+        <where>
+            <if test="role!=null">
+                and role = #{role}
+            </if>
+            <if test="username!=''">
+                <bind name="username" value="'%'+username+'%'"/>
+                and username like #{username}
+            </if>
+        </where>
+        limit #{pageInfo.pageStart},#{pageInfo.pageSize}
+    </select>
+    <!--查找符合条件的员工总人数-->
+    <select id="selectCountOfUser" resultType="int">
+        select count(*) from s_user
+        <where>
+            <if test="role!=null">
+                and role = #{role}
+            </if>
+            <if test="username!=''">
+                <bind name="username" value="'%'+username+'%'"/>
+                and username like #{username}
+            </if>
+        </where>
+    </select>
+    <!--通过用户ID删除一个用户-->
+    <delete id="deleteOneUserById" parameterType="long">
+        delete from s_user where id = #{0}
+    </delete>
+    <!--更改用户权限-->
+    <update id="updateUserRole">
+        update s_user
+        set role = #{0}
+        where id=#{1}
+    </update>
+    <!--重置密码为123456-->
+    <update id="updateUserPassword">
+        update s_user
+        set password = #{1}
+        where id = #{0}
+    </update>
+</mapper>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haiwen.mapper.EmployeeMapper">
+    <!--按条件动态查询员工信息-->
+    <select id="selectByEmpNumAndPsd" resultType="employee">
+        select * from s_employee
+        <where>
+            <if test="employeeNumber!=''">
+                and employeenumber = #{employeeNumber}
+            </if>
+            <if test="employeeName!=''">
+                <bind name="employeeName" value="'%'+employeeName+'%'"/>
+                and employeename like #{employeeName}
+            </if>
+        </where>
+        limit #{pageInfo.pageStart},#{pageInfo.pageSize}
+    </select>
+    <!--查找符合条件的员工总人数-->
+    <select id="selectCountOfEmployee" resultType="int">
+        select count(*) from s_employee
+        <where>
+            <if test="employeeNumber!=''">
+                and employeenumber = #{employeeNumber}
+            </if>
+            <if test="employeeName!=''">
+                <bind name="employeeName" value="'%'+employeeName+'%'"/>
+                and employeename like #{employeeName}
+            </if>
+        </where>
+    </select>
+    <!--删除一个员工信息-->
+    <delete id="deleteOneEmployee" parameterType="string">
+        delete from s_employee where employeenumber = #{employeeNumber}
+    </delete>
+    <!--插入一个员工信息-->
+    <insert id="insertEmployee" parameterType="employee" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into s_employee(employeename,employeephone,employeeemail,employeeaddress,employeesex,employeebirthday) values (#{employeename},#{employeephone},#{employeeemail},#{employeeaddress},#{employeesex},#{employeebirthday})
+    </insert>
+    <!--通过员工主键查找员工信息-->
+    <select id="selectEmployee" parameterType="long" resultType="employee">
+        select * from s_employee where id = #{id}
+    </select>
+    <!--清空数据-->
+    <delete id="deleteAll">
+        delete from s_employee where 1=1
+    </delete>
+    <!--修改员工信息-->
+    <update id="updateEmployee" parameterType="employee">
+        update s_employee set employeename = #{employeename},employeesex=#{employeesex},employeebirthday=#{employeebirthday},employeeaddress=#{employeeaddress},employeeemail=#{employeeemail},employeephone=#{employeephone}
+        where employeenumber = #{employeenumber}
+    </update>
+</mapper>

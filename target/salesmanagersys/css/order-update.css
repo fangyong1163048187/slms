@@ -1,0 +1,25 @@
+body{
+    background-image: url("../images/insert_bg.jpg");
+    background-size: 100% 100%;
+}
+.form{
+    position: relative;
+    top:50px;
+    left: 520px;
+}
+#sub{
+    position: relative;
+    left: 60px;
+}
+.button{
+    position: relative;
+    left: 95px;
+}
+.tip{
+    position: absolute;
+    left: 275px;
+    font-size: 25px;
+}
+#product_amount_tip{
+    top: 245px;
+}

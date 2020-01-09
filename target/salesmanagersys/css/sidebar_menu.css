@@ -1,0 +1,14 @@
+.my_aside{
+    height: 521px;
+    width: 230px;
+    z-index: 810;
+    background:#DDDDDD;
+}
+#bar li{
+    width: 230px;
+}
+#employee,#customer,#product,#supplier,#buy,#order,#role,#user{
+    color:steelblue;
+    position: absolute;
+    left: 25px;
+}

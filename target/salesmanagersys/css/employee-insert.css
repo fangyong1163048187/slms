@@ -1,0 +1,34 @@
+body{
+    background-image: url("../images/insert_bg.jpg");
+    background-size: 100% 100%;
+}
+.form{
+    position: relative;
+    top:50px;
+    left: 520px;
+}
+#sub{
+    position: relative;
+    left: 60px;
+}
+.button{
+    position: relative;
+    left: 95px;
+}
+.tip{
+    position: absolute;
+    left: 270px;
+    font-size: 25px;
+}
+#name_tip{
+    top: 0px;
+}
+#phone_tip{
+    top: 60px;
+}
+#email_tip{
+    top: 120px;
+}
+#address_tip{
+    top: 180px;
+}

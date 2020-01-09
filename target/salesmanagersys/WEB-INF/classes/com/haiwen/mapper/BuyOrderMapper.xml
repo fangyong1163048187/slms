@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haiwen.mapper.BuyOrderMapper">
+    <!--查询进货表，若该订单的相关商品或相关经办人或相关供货商被删除了，则该相关订单查询不到-->
+    <resultMap id="selBuyOrder" type="com.haiwen.pojo.Buyorder">
+        <id property="id" column="bid"/>
+        <result property="ordernumber" column="ordernumber"/>
+        <result property="productamount" column="productamount"/>
+        <result property="productallprice" column="productallprice"/>
+        <result property="createtime" column="createtime"/>
+        <result property="suppliername" column="suppliername"/>
+        <association property="product" javaType="product">
+            <id property="id" column="pid"/>
+            <result property="productnumber" column="productnumber"/>
+            <result property="productname" column="productname"/>
+            <result property="productbuyprice" column="productbuyprice"/>
+        </association>
+        <association property="supplier" javaType="supplier">
+            <id property="id" column="sid"/>
+            <result property="suppliernumber" column="suppliernumber"/>
+            <result property="linkphone" column="linkphone"/>
+        </association>
+        <association property="employee" javaType="employee">
+            <id property="id" column="eid"/>
+            <result property="employeenumber" column="employeenumber"/>
+            <result property="employeename" column="employeename"/>
+        </association>
+    </resultMap>
+    <select id="selectByBuyOrderNumAndPsd" resultMap="selBuyOrder">
+        select b.id bid,ordernumber,productamount,productallprice,b.createtime createtime,b.suppliername suppliername,p.id pid,productnumber,productname,productbuyprice,linkphone,s.id sid,suppliernumber,e.id eid,employeename,employeenumber
+        from s_buyorder b,s_product p,s_employee e,s_supplier s
+        <where>
+            and b.productid=p.id and b.supplierid=s.id and b.employeeid=e.id
+            <if test="orderNumber!=''">
+                and ordernumber = #{orderNumber}
+            </if>
+            <if test="employeeName!=''">
+                <bind name="employeeName" value="'%'+employeeName+'%'"/>
+                and e.employeename like #{employeeName}
+            </if>
+        </where>
+        limit #{pageInfo.pageStart},#{pageInfo.pageSize}
+    </select>
+    <!--查询符合查询条件的订单表总记录数
+    若该订单的相关商品或相关经办人或相关供应商被删除了，则该相关订单查询不到-->
+    <select id="selectCountOfBuyOrder" resultType="int">
+        select count(*) from s_buyorder b,s_product p,s_employee e,s_supplier s
+        <where>
+            and b.productid=p.id and b.supplierid=s.id and b.employeeid=e.id
+            <if test="orderNumber!=''">
+                and ordernumber = #{orderNumber}
+            </if>
+            <if test="employeeName!=''">
+                <bind name="employeeName" value="'%'+employeeName+'%'"/>
+                and e.employeename like #{employeeName}
+            </if>
+        </where>
+    </select>
+    <!--删除一个订单信息-->
+    <delete id="deleteOneBuyOrder" parameterType="string">
+        delete from s_buyorder where ordernumber = #{orderNumber}
+    </delete>
+    <!--修改库存表-->
+    <update id="updateStock" parameterType="com.haiwen.pojo.Buyorder">
+        update s_stock
+        set stockamount = stockamount+#{productamount}
+        where productid = #{productid}
+    </update>
+    <!--通过订单编号查找相关订单-->
+    <select id="selectBuyOrderByNumber" resultType="com.haiwen.pojo.Buyorder" parameterType="string">
+        select * from s_buyorder where ordernumber = #{0}
+    </select>
+    <!--插入订单表-->
+    <insert id="insertBuyOrder" parameterType="com.haiwen.pojo.Buyorder" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into s_buyorder(productid,productamount,productallprice,employeeid,supplierid,suppliername)
+        values (#{productid},#{productamount},#{productallprice},#{employeeid},#{supplierid},#{suppliername})
+    </insert>
+    <!--通过订单表ID查找订单表编号-->
+    <select id="selectBuyOrderNumber" resultType="com.haiwen.pojo.Buyorder" parameterType="long">
+        select * from s_buyorder where id=#{0}
+    </select>
+    <!--查找所有客户-->
+    <select id="selectAllSupplier" resultType="com.haiwen.pojo.Supplier">
+        select * from s_supplier
+    </select>
+    <!--查找所有商品-->
+    <select id="selectAllProduct" resultType="com.haiwen.pojo.Product">
+        select * from s_product
+    </select>
+    <!--查找所有经办人-->
+    <select id="selectAllEmployee" resultType="com.haiwen.pojo.Employee">
+        select *
+        from s_employee;
+    </select>
+    <!--通过顾客编号查找顾客ID-->
+    <select id="selectSupplier" resultType="com.haiwen.pojo.Supplier" parameterType="string">
+        select * from s_supplier where suppliernumber = #{0}
+    </select>
+    <!--通过商品编号查找商品ID-->
+    <select id="selectProduct" resultType="com.haiwen.pojo.Product" parameterType="string">
+        select * from s_product where productnumber=#{0}
+    </select>
+    <!--通过员工编号查找员工ID-->
+    <select id="selectEmployeeId" resultType="long" parameterType="string">
+        select id from s_employee where employeenumber=#{0}
+    </select>
+    <!--修改-->
+    <update id="updateBuyOrder" parameterType="com.haiwen.pojo.Buyorder">
+        update s_buyorder
+        set productid=#{productid},employeeid=#{employeeid},supplierid=#{supplierid},suppliername=#{suppliername},createtime=#{createtime},productamount=#{productamount},productallprice=#{productallprice}
+        where ordernumber = #{ordernumber}
+    </update>
+    <!--清空数据-->
+    <delete id="deleteAll">
+        delete from s_buyorder where 1=1;
+    </delete>
+</mapper>

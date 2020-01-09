@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haiwen.mapper.UserMapper">
+    <!--新增用户-->
+    <insert id="insertUser" parameterType="user">
+        insert into s_user values(default,#{username},#{password},#{photo},#{role})
+    </insert>
+    <!--通过用户名查找用户-->
+    <select id="selectUserByName" resultType="user" parameterType="string">
+        select * from s_user where username = #{username}
+    </select>
+    <!--通过用户姓名密码查找用户-->
+    <select id="selectUserByNameAndPsd" resultType="user" parameterType="user">
+        select * from s_user where username = #{username} and password = #{password}
+    </select>
+    <!--通过用户ID查找用户-->
+    <select id="selectUserById" resultType="user" parameterType="long">
+        select * from s_user where id = #{id}
+    </select>
+</mapper>

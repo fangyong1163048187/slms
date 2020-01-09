@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haiwen.mapper.SupplierMapper">
+    <!--按条件动态查询供应商信息-->
+    <select id="selectBySupNumAndPsd" resultType="com.haiwen.pojo.Supplier">
+        select * from s_supplier
+        <where>
+            <if test="supplierNumber!=''">
+                and suppliernumber = #{supplierNumber}
+            </if>
+            <if test="supplierName!=''">
+                <bind name="supplierName" value="'%'+supplierName+'%'"/>
+                and suppliername like #{supplierName}
+            </if>
+        </where>
+        limit #{pageInfo.pageStart},#{pageInfo.pageSize}
+    </select>
+    <!--查找符合条件的供应商总数-->
+    <select id="selectCountOfSupplier" resultType="int">
+        select count(*) from s_supplier
+        <where>
+            <if test="supplierNumber!=''">
+                and suppliernumber = #{supplierNumber}
+            </if>
+            <if test="supplierName!=''">
+                <bind name="supplierName" value="'%'+supplierName+'%'"/>
+                and suppliername like #{supplierName}
+            </if>
+        </where>
+    </select>
+    <!--判断供应商有没有相关联的采购单-->
+    <select id="JudgeHavaDataInSonTable" resultType="int" parameterType="long">
+        select count(*) from s_buyorder where supplierid=#{buyOrderSupplierID}
+    </select>
+    <!--删除一个供应商信息-->
+    <delete id="deleteOneSupplier">
+        <if test="is>0">
+            delete from s_buyorder where supplierid = #{buyOrderSupplierID};
+        </if>
+        delete from s_supplier where suppliernumber = #{supplierNumber};
+    </delete>
+    <!--清空数据-->
+    <delete id="deleteAllBuyOrder">
+        delete from s_buyorder where 1=1;
+    </delete>
+    <delete id="deleteAllSupplier">
+        delete from s_supplier where 1=1;
+    </delete>
+    <!--向供应商表插入一个供应商信息-->
+    <insert id="insertSupplier" parameterType="com.haiwen.pojo.Supplier" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into s_supplier(suppliername,linkman,linkphone,linkaddress) values (#{suppliername},#{linkman},#{linkphone},#{linkaddress});
+    </insert>
+    <!--通过供应商主键查找供应商信息-->
+    <select id="selectSupplier" parameterType="long" resultType="com.haiwen.pojo.Supplier">
+        select * from s_supplier where id = #{id}
+    </select>
+    <!--修改供应商信息-->
+    <update id="updateSupplier" parameterType="com.haiwen.pojo.Supplier">
+        update s_supplier set suppliername = #{suppliername},linkman=#{linkman},linkphone=#{linkphone},linkaddress=#{linkaddress}
+        where suppliernumber = #{suppliernumber}
+    </update>
+    <!--修改供应商信息时还要修改采购表里的供应商姓名-->
+    <!--两种情况：1、供应商没有相关联的采购表。2、供应商有相关联的采购表-->
+    <update id="updateBuyOrder">
+        update s_buyorder
+        <set>
+            id = id,
+            <if test="is>0">
+                suppliername = #{buyorder.suppliername}
+                where supplierid = #{buyorder.supplierid}
+            </if>
+        </set>
+    </update>
+</mapper>

@@ -1,0 +1,42 @@
+.bg{
+    width: 83%;
+    height: 525px;
+    background-image: url("../images/mainview_bg.jpg");
+    background-size: 104% 104%;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    float: left;
+    margin-left: 230px;
+    margin-top: -525px;
+}
+#image{
+    width: 167px;
+    height: 150px;
+    position: absolute;
+    top: 250px;
+    right: 40px;
+}
+
+#p1{
+    height: 50px;
+    color: #ffca00;
+    font-size: 42px;
+    font-family: 宋体;
+    font-weight: bold;
+    line-height: 40px;
+    position: absolute;
+    top: 240px;
+    left: 537px;
+}
+#p2{
+    height: 50px;
+    color: #ffca00;
+    font-size: 42px;
+    font-family: 宋体;
+    font-weight: bold;
+    line-height: 40px;
+    position: absolute;
+    top: 350px;
+    left: 545px;
+}

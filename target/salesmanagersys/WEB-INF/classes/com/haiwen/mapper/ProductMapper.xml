@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haiwen.mapper.ProductMapper">
+    <!--按条件动态查询员工信息-->
+    <resultMap id="selPro" type="com.haiwen.pojo.Product">
+        <id property="id" column="pid"/>
+        <result property="productname" column="productname"/>
+        <result property="productnumber" column="productnumber"/>
+        <result property="productbuyprice" column="productbuyprice"/>
+        <result property="productsalesprice" column="productsalesprice"/>
+        <association property="stock" javaType="stock">
+            <id property="id" column="pid"/>
+            <result property="productid" column="productid"/>
+            <result property="stockamount" column="stockamount"/>
+            <result property="salesamount" column="salesamount"/>
+            <result property="createtime" column="createtime"/>
+        </association>
+    </resultMap>
+    <select id="selectByProNumAndPsd" resultMap="selPro">
+        select p.id pid,productname,productnumber,productbuyprice,productsalesprice,t.id tid,productid,stockamount,salesamount,createtime
+        from s_product p left outer join s_stock t on p.id = t.productid
+        <where>
+            <if test="productNumber!=''">
+                and productnumber = #{productNumber}
+            </if>
+            <if test="productName!=''">
+                <bind name="productName" value="'%'+productName+'%'"/>
+                and productname like #{productName}
+            </if>
+        </where>
+        limit #{pageInfo.pageStart},#{pageInfo.pageSize}
+    </select>
+    <!--查找符合条件的商品总数-->
+    <select id="selectCountOfProduct" resultType="int">
+        select count(*) from s_product p left outer join s_stock t on p.id = t.productid
+        <where>
+            <if test="productNumber!=''">
+                and productnumber = #{productNumber}
+            </if>
+            <if test="productName!=''">
+                <bind name="productName" value="'%'+productName+'%'"/>
+                and productname like #{productName}
+            </if>
+        </where>
+    </select>
+    <!--删除一个商品信息-->
+    <delete id="deleteOneProduct">
+        <if test="stockProductID!=0">
+            delete from s_stock where productid = #{stockProductID};
+        </if>
+        delete from s_product where productnumber = #{productNumber};
+    </delete>
+    <!--清空数据-->
+    <delete id="deleteAll">
+        delete from s_stock where 1=1;
+        delete from s_product where 1=1;
+    </delete>
+    <!--向父表插入一个员工信息-->
+    <insert id="insertProduct" parameterType="com.haiwen.pojo.Product" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into s_product(productname,productbuyprice,productsalesprice) values (#{productname},#{productbuyprice},#{productsalesprice});
+    </insert>
+    <!--向子表插入信息-->
+    <insert id="insertStockProductId" parameterType="com.haiwen.pojo.Stock">
+        insert into s_stock(productid,salesamount,stockamount) values (#{productid},#{salesamount},#{stockamount});
+    </insert>
+    <!--通过商品主键查找商品信息-->
+    <select id="selectProduct" parameterType="long" resultType="com.haiwen.pojo.Product">
+        select * from s_product where id = #{id}
+    </select>
+    <!--修改商品信息-->
+    <update id="updateProduct">
+        update s_product set productname = #{product.productname},productsalesprice=#{product.productsalesprice},productbuyprice=#{product.productbuyprice}
+        where productnumber = #{product.productnumber};
+        <choose>
+            <when test="is>0">
+                update s_stock set stockamount = #{product.stock.stockamount},salesamount = #{product.stock.salesamount}
+                where productid = #{product.stock.productid};
+            </when>
+            <otherwise>
+                insert into s_stock(productid,stockamount,salesamount) values (#{product.stock.productid},#{product.stock.stockamount},#{product.stock.salesamount})
+            </otherwise>
+        </choose>
+    </update>
+    <!--判断父表的某个记录在子表里是否有关联数据-->
+    <select id="judgeHavaDataInSonTable" resultType="int" parameterType="long">
+        select * from s_stock where productid = #{id}
+    </select>
+
+</mapper>

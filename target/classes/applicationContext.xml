@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!--配置组件扫描，注解-->
+    <context:component-scan base-package="com.haiwen.service.impl,com.haiwen.advice"/>
+    <!--开启动态代理-->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+    <!--加载属性文件db.properties-->
+    <context:property-placeholder location="classpath:db.properties"/>
+    <!--连接数据库-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <!--&lt;!&ndash;开启日志&ndash;&gt;
+    <bean id="configuration" class="org.apache.ibatis.session.Configuration">
+        &lt;!&ndash;相当于mybatis的setting设置中开启sql日志,在日志中输出sql语句&ndash;&gt;
+        <property name="logImpl" value="org.apache.logging.log4j.Logger"/>
+    </bean>-->
+    <!--创建sqlsessionfactory-->
+    <bean id="factory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="com.haiwen.pojo"/>
+        <!--引入mybatis.xml文件（之所以引入mybatis.xml文件，就是开启查看SQL语句日志的功能）-->
+        <property name="configLocation" value="classpath:mybatis.xml"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath:com/haiwen/mapper/*Mapper.xml"/>
+    </bean>
+    <!--扫描mapper包-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.haiwen.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="factory"/>
+    </bean>
+    <!--事务管理器-->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--声明式事务-->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <!--指定这些方法是需要进行事务控制的-->
+            <tx:method name="insert*" isolation="READ_COMMITTED" rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" isolation="READ_COMMITTED" rollback-for="java.lang.Exception"/>
+            <tx:method name="delete*" isolation="READ_COMMITTED" rollback-for="java.lang.Exception"/>
+            <tx:method name="*" read-only="true" isolation="READ_COMMITTED" rollback-for="java.lang.Exception"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+        <aop:pointcut id="mypoing" expression="execution(* com.haiwen.service.impl.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="mypoing"/>
+    </aop:config>
+</beans>

@@ -1,0 +1,40 @@
+body{
+    background-image: url("../images/alter_bg.jpg");
+    background-size: 100% 100%;
+}
+.form{
+    position: relative;
+    top:50px;
+    left: 520px;
+}
+#sub{
+    position: relative;
+    left: 60px;
+}
+.button{
+    position: relative;
+    left: 95px;
+}
+.tip{
+    position: absolute;
+    left: 270px;
+    font-size: 25px;
+}
+#number_tip{
+    top: 0;
+}
+#name_tip{
+    top: 60px;
+}
+#buyprice_tip{
+    top: 120px;
+}
+#salesprice_tip{
+    top: 180px;
+}
+#stockamount_tip{
+    top: 240px;
+}
+#salesamount_tip{
+    top: 300px;
+}

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haiwen.mapper.CustomerMapper">
+    <!--按条件动态查询员工信息-->
+    <select id="selectByCusNumAndPsd" resultType="com.haiwen.pojo.Customer">
+        select * from s_customer
+        <where>
+            <if test="customerNumber!=''">
+                and customernumber = #{customerNumber}
+            </if>
+            <if test="customerName!=''">
+                <bind name="customerName" value="'%'+customerName+'%'"/>
+                and customername like #{customerName}
+            </if>
+        </where>
+        limit #{pageInfo.pageStart},#{pageInfo.pageSize}
+    </select>
+    <!--查找符合条件的客户总人数-->
+    <select id="selectCountOfCustomer" resultType="int">
+        select count(*) from s_customer
+        <where>
+            <if test="customerNumber!=''">
+                and customernumber = #{customerNumber}
+            </if>
+            <if test="customerName!=''">
+                <bind name="customerName" value="'%'+customerName+'%'"/>
+                and customername like #{customerName}
+            </if>
+        </where>
+    </select>
+    <!--判断顾客有没有相关联的订单-->
+    <select id="JudgeHavaDataInSonTable" resultType="int" parameterType="long">
+        select count(*) from s_salesorder where customerid=#{salesOrderCustomerID}
+    </select>
+    <!--删除一个客户信息-->
+    <delete id="deleteOneCustomer">
+        <if test="is>0">
+            delete from s_salesorder where customerid = #{salesOrderCustomerID};
+        </if>
+        delete from s_customer where customernumber = #{customerNumber};
+    </delete>
+    <!--清空数据-->
+    <delete id="deleteAllSalesOrder">
+        delete from s_salesorder where 1=1;
+    </delete>
+    <delete id="deleteAllCustomer">
+        delete from s_customer where 1=1;
+    </delete>
+    <!--向顾客表插入一个顾客信息-->
+    <insert id="insertCustomer" parameterType="com.haiwen.pojo.Customer" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into s_customer(customername,linkman,linkphone,linkaddress) values (#{customername},#{linkman},#{linkphone},#{linkaddress});
+    </insert>
+    <!--通过顾客主键查找顾客信息-->
+    <select id="selectCustomer" parameterType="long" resultType="com.haiwen.pojo.Customer">
+        select * from s_customer where id = #{id}
+    </select>
+    <!--修改顾客信息-->
+    <update id="updateCustomer" parameterType="com.haiwen.pojo.Customer">
+        update s_customer set customername = #{customername},linkman=#{linkman},linkphone=#{linkphone},linkaddress=#{linkaddress}
+        where customernumber = #{customernumber}
+    </update>
+    <!--修改顾客信息时还要修改订单表里的顾客姓名-->
+    <!--两种情况：1、顾客没有相关联的订单。2、顾客有相关联的订单-->
+    <update id="updateSalesOrder">
+        update s_salesorder
+        <set>
+            id = id,
+            <if test="is>0">
+                customername = #{salesorder.customername}
+                where customerid = #{salesorder.customerid}
+            </if>
+        </set>
+    </update>
+</mapper>
